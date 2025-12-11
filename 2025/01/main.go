@@ -7,85 +7,62 @@ import (
 	"strconv"
 )
 
-// Task 1
 func main() {
-	const startingIndex int = 50
+	startIndex := 50
+	counter := 0
 
-	fmt.Println(howManyZeros(getAllIndeces(startingIndex, getAllSteps())))
-}
-
-func getAllSteps() []int {
-	var steps []int
-
-	inputFile, err := os.Open("input01.txt")
-	if err != nil {
-		fmt.Print("Error:", err)
-		return nil
-	}
+	// inputFile, _ := os.Open("exampleinput.txt")
+	inputFile, _ := os.Open("input01.txt")
 	defer inputFile.Close()
 
-	// scanner to read each line
 	scanner := bufio.NewScanner(inputFile)
 
-	// Loop through each line to read
+	currentIndex := startIndex
+
 	for scanner.Scan() {
-		line := scanner.Text()
-		// fmt.Println(convertLine(line))
-		steps = append(steps, convertLine(line))
-	}
 
-	if err := scanner.Err(); err != nil {
-		fmt.Println("Error:", err)
-	}
+		step := scanner.Text()
 
-	return steps
-}
-
-func convertLine(stringToSplit string) int {
-	directionChar := stringToSplit[0]
-
-	valueToMove := stringToSplit[1:]
-
-	numberToReturn, err := strconv.Atoi(valueToMove)
-	if err != nil {
-		fmt.Println("Error:", err)
-		return 0
-	}
-
-	if directionChar == 'L' {
-		return -numberToReturn
-	}
-
-	return numberToReturn
-}
-
-func getAllIndeces(startingIndex int, convertedValues []int) []int {
-	currentIndex := startingIndex
-	var allIndeces []int
-
-	for i := 0; i < len(convertedValues); i++ {
-		// fmt.Println(currentIndex)
-		// fmt.Println(convertedValues[i])
-
-		currentIndex = currentIndex + convertedValues[i]
-
-		currentIndex = ((currentIndex % 100) + 100) % 100
-
-		allIndeces = append(allIndeces, currentIndex)
-		// fmt.Println(allIndeces)
-	}
-
-	return allIndeces
-}
-
-func howManyZeros(sliceToCount []int) int {
-	var counter int
-
-	for _, value := range sliceToCount {
-		if value == 0 {
-			counter++
+		sign := step[0]
+		stepValue, err := strconv.Atoi(step[1:])
+		if err != nil {
+			// show actual error
+			panic(err)
 		}
+
+		if sign == 'L' {
+			// go in correct direction
+			stepValue = -stepValue
+		}
+
+		// task 2 to compare
+		oldIndex := currentIndex
+		// move to next correct index
+		currentIndex = ((currentIndex+stepValue)%100 + 100) % 100
+
+		// how many times do I pass 0?
+		passes := abs(stepValue) / 100
+		// each step
+		// if we went left and the currentIndex is larger than old index, we passed 0
+		if stepValue < 0 && currentIndex > oldIndex && oldIndex != 0 {
+			passes++
+			// if we went right and the currentIndex is smaller than old index, we passed 0
+		} else if stepValue > 0 && currentIndex < oldIndex && oldIndex != 0 {
+			passes++
+		} else if stepValue < 0 && oldIndex != 0 && currentIndex == 0 {
+			passes++
+		}
+
+		counter += passes
 	}
 
-	return counter
+	fmt.Println(counter)
+}
+
+// helper function
+func abs(input int) int {
+	if input < 0 {
+		return -input
+	}
+	return input
 }
