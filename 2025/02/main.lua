@@ -10,7 +10,7 @@ for each in converted:gmatch("[^,]+") do
 	table.insert(ranges, each)
 end
 
--- result to print
+-- result to print/return in the end
 local total = 0
 
 -- compare the halves
@@ -18,20 +18,23 @@ local total = 0
 function has_pattern(num)
 	-- convert to string first
 	local number_string = tostring(num)
-	if #number_string % 2 ~= 0 then
-		return 0
-	end
 
-	-- split if even
-	local middle = #number_string / 2
-	local first_half = number_string:sub(1, middle)
-	local second_half = number_string:sub(middle + 1)
+	-- check through possible pattern lengths
+	for pattern_length = 1, (#number_string / 2) do
+		local pattern = number_string:sub(1, pattern_length)
 
-	if first_half == second_half then
-		return num
-	else
-		return 0
+		-- does the pattern divide our string evenly?
+		if #number_string % pattern_length == 0 then
+			-- how many times would it repeat
+			local times = #number_string / pattern_length
+			local repeated = pattern:rep(times)
+
+			if repeated == number_string then
+				return num
+			end
+		end
 	end
+	return 0
 end
 
 -- now iterate through each range
